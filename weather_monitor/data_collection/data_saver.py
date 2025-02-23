@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from pathlib import Path
-from typing import Union
 
 import numpy as np
 import xarray as xr
@@ -10,10 +9,11 @@ import xarray as xr
 
 class WeatherDataSaver:
     """Класс для сохранения метеорологических данных в формате NetCDF.
-    
+
     Обеспечивает сохранение временных рядов температуры для различных городов
-    в формате NetCDF с поддержкой добавления новых данных к существующему файлу.
-    
+    в формате NetCDF с поддержкой добавления новых данных
+    к существующему файлу.
+
     Attributes:
         netcdf_path (Path): Путь к файлу NetCDF для сохранения данных
     """
@@ -23,7 +23,7 @@ class WeatherDataSaver:
         Args:
             netcdf_path: Путь к файлу NetCDF
         """
-        self.netcd_path = netcdf_path
+        self.netcdf_path = Path(netcdf_path)
 
     def save_weather_data(
         self, city_name: str, temperature: float,
@@ -38,31 +38,60 @@ class WeatherDataSaver:
             None
         """
         try:
-            # попытка открыть существующий файл
-            ds = xr.open_dataset(self.netcd_path)
-            temperature_data = ds.temperature.values
-            times = ds.time.values
-            cities = ds.city.values
+            ds = self._read_existing_data()
         except FileNotFoundError:
-            # создание нового датасета
-            temperature_data = np.array([[temperature]])
-            times = np.array([timestamp])
-            cities = np.array([city_name])
+            ds = self._create_new_dataset(city_name, temperature, timestamp)
         else:
-            ds.close()
-            # добавление новых данных
-            if city_name not in cities:
-                temperature_data = np.vstack([temperature_data, [temperature]])
-                cities = np.append(cities, city_name)
-            else:
-                city_idx = np.where(cities == city_name)[0][0]
-                if timestamp not in times:
-                    temperature_data = np.column_stack(
-                        [temperature_data, [temperature]]
-                    )
-                    times = np.append(times, timestamp)
+            ds = self._update_dataset(ds, city_name, temperature, timestamp)
+        self._save_dataset(ds)
+
+    def _read_existing_data(self) -> xr.Dataset:
+        """Читает существующий файл данных."""
+        return xr.open_dataset(self.netcdf_path)
+
+    def _create_new_dataset(
+        self,
+        city_name: str,
+        temperature: float,
+        timestamp: datetime
+    ) -> xr.Dataset:
+        """Создает новый набор данных."""
+        return xr.Dataset(
+            data_vars={
+                'temperature': (['city', 'time'], np.array([[temperature]]))
+            },
+            coords={
+                'city': [city_name],
+                'time': [timestamp]
+            }
+        )
+
+    def _update_dataset(
+        self,
+        ds: xr.Dataset,
+        city_name: str,
+        temperature: float,
+        timestamp: datetime
+    ) -> xr.Dataset:
+        """Обновляет существующий набор данных."""
+        # Получаем numpy массивы из датасета
+        temperature_data = ds.temperature.values
+        times = ds.time.values
+        cities = ds.city.values
+
+        if city_name not in cities:
+            # Добавляем новый город: вертикальное добавление строки
+            temperature_data = np.vstack([temperature_data, [temperature]])
+            cities = np.append(cities, city_name)
+        else:
+            if timestamp not in times:
+                # Добавляем новый временной срез: гориз. добавление столбца
+                temperature_data = np.column_stack(
+                    [temperature_data, np.full(len(cities), temperature)]
+                )
+                times = np.append(times, timestamp)
         # создание и сохранение датасета
-        ds_new = xr.Dataset(
+        return xr.Dataset(
             data_vars={
                 'temperature': (['city', 'time'], temperature_data)
             },
@@ -71,4 +100,7 @@ class WeatherDataSaver:
                 'time': times
             }
         )
-        ds_new.to_netcdf(self.netcd_path)
+
+    def _save_dataset(self, ds: xr.Dataset) -> None:
+        """Сохраняет набор данных в файл."""
+        ds.to_netcdf(self.netcdf_path)
