@@ -1,0 +1,30 @@
+base_url: "http://api.openweathermap.org/data/2.5/weather"
+
+cities:
+  - name: "Moscow"
+    id: 524901
+  - name: "Grodno"
+    id: 627907
+  - name: "St. Petersburg"
+    id: 5911798
+  - name: "Yuzhno-Sakhalinsk"
+    id: 2119441
+  - name: "Tula"
+    id: 542159
+  - name: "Orekhovo-Borisovo Yuzhnoye"
+    id: 572449
+
+telegram:
+ - bot_token: "нужно взять токен из .env"
+ - openweathermap_key: "нужно взять ключ из .env"
+ - chat_id: "нужно взять id из .env"
+
+temperature_thresholds:
+ - high: 15
+ - low: -5
+
+
+data_storage:
+api:
+  - netcdf_path: "data/weather_data.nc"
+
