@@ -12,24 +12,38 @@
 ## Установка
 
 ### Клонировать репозиторий
-'''git clone https://github.com/LynnG3/weather-monitor.git'''
-'''cd weather-monitor'''
+```
+git clone https://github.com/LynnG3/weather-monitor.git
+```
+```
+cd weather-monitor
+```
 ### Создать и активировать виртуальное окружение
-'''python -m venv venv'''
-'''source venv/bin/activate''' для Linux/Mac
-или
-'''venv\Scripts\activate''' для  Windows
+```
+python -m venv venv
+```
+для Linux/Mac:
+```
+source venv/bin/activate
+```
+или для  Windows:
+```
+venv\Scripts\activate
+```
 ### Установить зависимости
-'''pip install -r requirements.txt'''
+```
+pip install -r requirements.txt
+```
 
 ## Настройка
 - Создать файл `.env` в корневой директории:
-plaintext
+```
 OPENWEATHERMAP_KEY=your_api_key
 TELEGRAM_BOT_TOKEN=your_bot_token
 TELEGRAM_CHAT_ID=your_chat_id
+```
 
-- Настроить список городов и пороговые значения в `config/config.yml`
+- Настроить список городов и пороговые значения температур в `config/config.yml`. Список городов c идентификаторами можно найти [здесь](http://bulk.openweathermap.org/sample/)
 
 ### Использование
 - TODO
