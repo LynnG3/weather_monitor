@@ -27,6 +27,7 @@ import logging
 
 from aiogram import Bot
 from aiogram.enums import ParseMode
+from aiogram.client.default import DefaultBotProperties
 from aiogram.exceptions import AiogramError
 
 logger = logging.getLogger(__name__)
@@ -44,7 +45,8 @@ class TelegramNotifier:
             bot_token: Токен Telegram бота
             chat_id: ID чата для отправки сообщений
         """
-        self.bot = Bot(token=bot_token, parse_mode=ParseMode.HTML)
+        default = DefaultBotProperties(parse_mode=ParseMode.HTML)
+        self.bot = Bot(token=bot_token, default=default)
         self.chat_id = chat_id
 
     async def send_alert(self, message: str) -> None:

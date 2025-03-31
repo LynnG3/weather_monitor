@@ -1,11 +1,35 @@
-from pathlib import Path
-from typing import Dict, Any
-from functools import lru_cache
+"""Модуль для взаимодействия с API погоды.
+
+Этот модуль предоставляет функциональность для получения данных о погоде
+через OpenWeatherMap API. Поддерживает асинхронные запросы и обработку ошибок.
+
+Основные компоненты:
+    - WeatherAPI: Класс для взаимодействия с API погоды
+
+Пример использования:
+    api = WeatherAPI(config_path)
+    weather_data = await api.get_weather(city_id=123456)
+    temperature = weather_data['main']['temp']
+
+Attributes:
+    logger: Logger для записи информации о запросах и ошибках
+
+Note:
+    Для работы требуется API ключ OpenWeatherMap.
+    Ключ должен быть указан в конфигурационном файле.
+"""
+
 import os
+
+from pathlib import Path
+from typing import Dict
+from functools import lru_cache
 
 import requests
 import yaml
-# from dotenv import load_dotenv
+import aiohttp
+
+from weather_monitor.exceptions import WeatherAPIError
 
 
 class WeatherAPI:
@@ -37,20 +61,26 @@ class WeatherAPI:
         """
         return yaml.safe_load(config_path.read_text())
 
-    def get_weather(self, city_id: int) -> Dict[str, Any]:
+    async def get_weather(self, city_id: int) -> dict:
         """Получение данных о погоде для конкретного города.
         Args:
             city_id (int): ID города в системе OpenWeatherMap
         Returns:
-            Dict[str, Any]: Данные о погоде в формате JSON
+            dict: Данные о погоде
         Raises:
-            requests.exceptions.HTTPError: При ошибке запроса к API. """
-        params = {
-            'id': city_id,
-            'appid': self.api_key,
-            'units': 'metric'  # Использование метрической системы
-        }
-        # response = requests.get(self.base_url, params=params)
-        with self.session.get(self.base_url, params=params) as response:
-            response.raise_for_status()
-        return response.json()
+            WeatherAPIError: При ошибке получения данных.
+        """
+        try:
+            params = {
+                'id': city_id,
+                'appid': self.api_key,
+                'units': 'metric'
+            }
+            async with aiohttp.ClientSession() as session:
+                async with session.get(self.base_url, params=params) as response:
+                    response.raise_for_status()
+                    return await response.json()
+        except aiohttp.ClientError as e:
+            raise WeatherAPIError(
+                f"Error fetching weather data for city ID {city_id}: {e}"
+            ) from e

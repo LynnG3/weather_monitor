@@ -5,26 +5,17 @@ cities:
     id: 524901
   - name: "Grodno"
     id: 627907
-  - name: "St. Petersburg"
-    id: 5911798
   - name: "Yuzhno-Sakhalinsk"
     id: 2119441
-  - name: "Tula"
-    id: 542159
   - name: "Orekhovo-Borisovo Yuzhnoye"
     id: 572449
 
-telegram:
- - bot_token: "нужно взять токен из .env"
- - openweathermap_key: "нужно взять ключ из .env"
- - chat_id: "нужно взять id из .env"
 
 temperature_thresholds:
- - high: 15
- - low: -5
+  high: 10
+  low: 0
 
 
 data_storage:
-api:
-  - netcdf_path: "data/weather_data.nc"
+  netcdf_path: "data/weather_data.nc"
 

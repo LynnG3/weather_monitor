@@ -1,3 +1,34 @@
+"""Модуль анализа температурных данных.
+
+Этот модуль предоставляет функциональность для анализа температурных данных
+и определения необходимости отправки уведомлений
+при достижении пороговых значений.
+
+Основные компоненты:
+    - TemperatureThresholds: Структура данных для хранения пороговых значений
+    - TemperatureAnalyzer: Класс для анализа температурных данных
+
+Пример использования:
+    thresholds = {'high': 30.0, 'low': -10.0}
+    analyzer = TemperatureAnalyzer(thresholds)
+
+    # Проверка необходимости уведомления
+    if analyzer.should_notify(weather_record):
+        threshold = analyzer.get_threshold(weather_record)
+        # Отправка уведомления
+
+Attributes:
+    logger: Logger для записи информации об ошибках
+
+Note:
+    Пороговые значения задаются в конфигурационном файле.
+    Уведомления отправляются в следующих случаях:
+    - Первое измерение для города
+    - Температура ниже нижнего порога
+    - Температура выше верхнего порога
+    - Температура пересекла пороговое значение
+"""
+
 import logging
 from dataclasses import dataclass
 from typing import Dict
@@ -32,6 +63,21 @@ class TemperatureAnalyzer:
             low=thresholds['low']
         )
         self.last_temperatures: Dict[str, float] = {}
+
+    def get_threshold(self, record: WeatherRecord) -> float:
+        """Возвращает текущее пороговое значение для записи.
+
+        Args:
+            record: Запись с погодными данными
+
+        Returns:
+            float: Пороговое значение (верхнее или нижнее)
+        """
+        return (
+            self.thresholds.high
+            if record.temperature > self.thresholds.high
+            else self.thresholds.low
+        )
 
     def should_notify(self, record: WeatherRecord) -> bool:
         """Определяет, нужно ли отправлять уведомление.
@@ -69,4 +115,4 @@ class TemperatureAnalyzer:
         return should_notify
 
     async def update_statistics(self):
-        """Обновляет статистику температур."""
+        """Обновляет статистику температур. TODO: реализовать"""
