@@ -2,9 +2,25 @@
 
 from datetime import datetime
 from pathlib import Path
+from dataclasses import dataclass
 
 import numpy as np
 import xarray as xr
+
+
+@dataclass
+class WeatherRecord:
+    """Структура данных для хранения записи о погоде.
+
+    Attributes:
+        city_name: Название города
+        temperature: Температура в градусах Цельсия
+        timestamp: Временная метка измерения
+    """
+
+    city_name: str
+    temperature: float
+    timestamp: datetime
 
 
 class WeatherDataSaver:
@@ -90,7 +106,7 @@ class WeatherDataSaver:
                     [temperature_data, np.full(len(cities), temperature)]
                 )
                 times = np.append(times, timestamp)
-        # создание и сохранение датасета
+        # обновление и сохранение датасета
         return xr.Dataset(
             data_vars={
                 'temperature': (['city', 'time'], temperature_data)

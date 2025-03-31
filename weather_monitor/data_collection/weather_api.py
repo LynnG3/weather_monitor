@@ -24,10 +24,10 @@ class WeatherAPI:
         self.config = self._load_config(config_path)
         self.api_key = os.getenv('OPENWEATHERMAP_KEY')
         self.base_url = self.config['base_url']
-        self.session = requests.Session()  # Переиспользование сессии
+        self.session = requests.Session()  # Переиспользование сессии
 
     @staticmethod
-    @lru_cache  # Кэширование конфига
+    @lru_cache  # Кэширование конфига
     def _load_config(config_path: Path) -> Dict:
         """Загружает и кэширует конфигурацию из yaml файла.
         Args:
